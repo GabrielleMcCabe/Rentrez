@@ -1,0 +1,133 @@
+---
+title: "Analysis"
+author: "Gabrielle McCabe"
+date: "03/02/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Import Sequences.csv and print out each sequence.
+```{r}
+Sequences <- read.csv("Sequences.csv")
+print(Sequences[1, "Sequence"])  # HQ433692.1 sequence.
+print(Sequences[2, "Sequence"])  # HQ433694.1 sequence.
+print(Sequences[3, "Sequence"])  # HQ433691.1 sequence.
+```
+
+Count the number of each base pair in each of the 3 sequences. I first calculated the total length of the sequence using nchar(). I then took out all of the A in the sequence, calculated the length and subtracted that from the total length to get the number of A in the sequence. I repeated this for each base in each sequence by using a for loop.
+```{r}
+totalLength <- c()
+baseCounts <- c()
+for (i in 1:3){
+  totalLength <- c(totalLength, nchar(as.character(Sequences[i, "Sequence"])))
+  baseCounts <- c(baseCounts, totalLength - nchar(gsub("A", "", Sequences[i, "Sequence"])))
+  baseCounts <- c(baseCounts, totalLength - nchar(gsub("T", "", Sequences[i, "Sequence"])))
+  baseCounts <- c(baseCounts, totalLength - nchar(gsub("C", "", Sequences[i, "Sequence"])))
+  baseCounts <- c(baseCounts, totalLength - nchar(gsub("G", "", Sequences[i, "Sequence"])))
+}
+```
+
+Here is a table presenting the number of each nucleotide in each sequence. I set echo = T and results = "hide" so that the output of the print statements would not be displayed on the .html but so I could still see them in the .Rmd in order to produce the table below. 
+```{r, echo = T, results = "hide"}
+print(baseCounts)
+```
+
+Sequence ID | Number of A | Number of T | Number of C | Number of G 
+----- | ----- | ----- | ----- | -----
+HQ433692.1 | 154 | 114 | 82 | 131
+HQ433694.1 | 155 | 114 | 81 | 131
+HQ433691.1 | 154 | 115 | 81 | 131 
+
+Below is an image of the Lyme Disease causing bacteria *Borrelia burgdorferi*.
+![*Borrelia burgdorferi*](./borrelia_burgdorferi.jpg)
+
+Here is a link to the [Wikipedia page about *Borrelia burgdorferi*](https://en.wikipedia.org/wiki/Borrelia_burgdorferi)
+
+Calculate the GC content (% of nucleotides that are G or C) for each sequence ID. GC content = ((number of G + number of C) / total sequence length) * 100
+```{r}
+seq1GC <- ((baseCounts[4] + baseCounts[3]) / (totalLength[1])) * 100
+
+seq2GC <- ((baseCounts[8] + baseCounts[7]) / (totalLength[2])) * 100
+
+seq3GC <- ((baseCounts[12] + baseCounts[11]) / (totalLength[3])) * 100
+```
+
+Here is a table presenting the GC content in each sequence. I set echo = T and results = "hide" so that the output of the print statements would not be displayed on the .html but so I could still see them in the .Rmd in order to produce the table below.
+```{r, echo = T, results = "hide"}
+print(seq1GC)
+print(seq2GC)
+print(seq3GC)
+```
+
+Sequence ID | GC content
+----- | -----
+HQ433692.1 | 44.28%
+HQ433694.1 | 44.07%
+HQ433691.1 | 44.07%
+
+Import GC_content.csv and the ggplot2 and dplyr librarys. I included warning = FALSE and message = FALSE so that the warning messages did not show in the html.
+```{r, warning = FALSE, message = FALSE}
+library(ggplot2)
+library(dplyr)
+
+GCcont <- read.csv("GC_content.csv")
+head(GCcont)  # View the first few rows of GCcont.
+```
+
+Calculate %GC content for each of the specimens and add this in a new column. %GC content = %G + %C
+```{r}
+GCcont <- mutate(GCcont, GCpercent = G + C)
+```
+
+Here is a scatterplot of %GC for each of the specimens, separated by species. Using the clean theme for presentations and publications used in the Colautti Lab.
+```{r}
+theme_pubworthy <- function (base_size = 12, base_family = "") {
+  theme_classic(base_size = base_size, base_family = base_family) %+replace% 
+    theme(
+      axis.text = element_text(colour = "black"),
+      axis.title.x = element_text(size=18),
+      axis.text.x = element_text(size=12),
+      axis.title.y = element_text(size=18,angle=90),
+      axis.text.y = element_text(size=12),
+      axis.ticks = element_blank(), 
+      panel.background = element_rect(fill="white"),
+      panel.border = element_blank(),
+      plot.title=element_text(face="bold", size=24),
+      legend.position="none"
+    ) 
+}
+
+qplot(x = Species, y = GCpercent, data = GCcont, colour = Species, alpha = I(0.4)) + theme_pubworthy()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
